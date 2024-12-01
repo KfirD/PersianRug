@@ -25,7 +25,7 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LogNorm, TwoSlopeNorm
 from matplotlib.gridspec import GridSpec
 
-import PersianRug.utils.plot.plotdefaults
+import utils.plot.plotdefaults
 
 plt.rc("font", **{"size": 30})
 

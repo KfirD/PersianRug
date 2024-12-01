@@ -5,9 +5,13 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 
-import PersianRug.utils.plot.plotdefaults
-from PersianRug.model import Model
-from PersianRug.utils.plot.plotfuncs import plot_matrix_vector
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+
+import utils.plot.plotdefaults
+from model import Model
+from utils.plot.plotfuncs import plot_matrix_vector
 
 plt.rc('font', size=30)
 

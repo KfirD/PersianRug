@@ -3,13 +3,17 @@ This is a script for plotting curves of loss versus ratio and loss versus p,
 for various models. 
 """
 
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+
 from typing import Iterable
 import numpy as np
 import pandas as pd
 # Custom Packages
-from PersianRug.utils import model_analytics as ma
-from PersianRug.utils import model_scan as ms
-from PersianRug.utils.plot import plotfuncs
+from utils import model_analytics as ma
+from utils import model_scan as ms
+from utils.plot import plotfuncs
 
 LINEAR_N_SPARSES = [8192]
 TRAINED_N_SPARSES = [8192]
@@ -101,7 +105,7 @@ STYLES = {
 
 
 def plot_loss_with_ratio(
-    comb_df: pd.Dataframe,
+    comb_df: pd.DataFrame,
     target_ps: Iterable[float],
 ):
     """

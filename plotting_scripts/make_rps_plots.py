@@ -3,13 +3,17 @@ This script is for making heatmaps (over p_feat and ratio) for various quantitie
 of interest for the trained model.
 """
 
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+
 from typing import Dict, Tuple, Optional
 
 
 import pandas as pd
-from PersianRug.utils import model_scan as ms
-from PersianRug.utils.plot import plotfuncs
-from PersianRug.utils.model_measurement import ModelMeasurement
+from utils import model_scan as ms
+from utils.plot import plotfuncs
+from utils.model_measurement import ModelMeasurement
 
 EXPERIMENTS = {"non_average_run_09_26": {'experiment_label' : 'Trained Models (128,...,4096)'}, 
                    "non_average_run_8192_09_26": {'experiment_label': 'Trained Models (8192)'}}
