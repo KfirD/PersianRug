@@ -15,10 +15,7 @@ from utils import model_scan as ms
 from utils.plot import plotfuncs
 from utils.model_measurement import ModelMeasurement
 
-EXPERIMENTS = {"non_average_run_09_26": {'experiment_label' : 'Trained Models (128,...,4096)'}, 
-                   "non_average_run_8192_09_26": {'experiment_label': 'Trained Models (8192)'}}
-PAPER_DIR = ('/Users/alexinf/Dropbox/apps/Overleaf/Sparsity'
-                       ' and Computation in NNs/PersianRug/images/')
+EXPERIMENTS = {"recreate_trained_models": {'experiment_label' : 'Trained Models (128,...,4096)'}}
 N_SPARSES_TO_KEEP = [128, 1024, 8192]
 
 def make_rps_plots(dframe: pd.DataFrame,
@@ -76,5 +73,4 @@ if __name__ == "__main__":
     df = df[df['n_sparse'].isin(N_SPARSES_TO_KEEP)]
 
     make_rps_plots(df, mm_dict, paper_directory=None, orientation=None)
-    # make_paper_plots(df, mm_dict, paper_directory=PAPER_DIR, orientation=None)
 

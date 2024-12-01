@@ -31,20 +31,11 @@ P_MIN = 0.002001
 P_MAX = 0.8
 
 TRAINED_EXPERIMENTS = {
-    "non_average_run_09_26": {"experiment_label": "Trained Models (128,...,4096)"},
-    "non_average_run_8192_09_26": {"experiment_label": "Trained Models (8192)"},
+    "recreate_trained_models": {"experiment_label": "Trained Models"},
 }
 
 HADAMARD_EXPERIMENTS = {
-    "hadamard_128_num_tries_5_better_spec": {
-        "experiment_label": r"$\mathrm{Hadamard} (n_s=128)$",
-        "experiment_nickname": "h-128",
-    },
-    "hadamard_1024_num_tries_5_better_spec": {
-        "experiment_label": r"$\mathrm{Hadamard} (n_s=1024)$",
-        "experiment_nickname": "h-1024",
-    },
-    "8192_overnight": {
+    "recreate_Hadamard_8192": {
         "experiment_label": r"$\mathrm{Hadamard} (n_s=8192)$",
         "experiment_nickname": "h-8192",
     },
@@ -168,11 +159,6 @@ if __name__ == "__main__":
     df["experiment_nickname"] = df["n_sparse"].apply(lambda x: "t-" + f"{x}")
     h_df, h_dict = ms.load_multiple_hadamard_experiments_measurements(
         HADAMARD_EXPERIMENTS, overwrite=False
-    )
-
-    # Plot final loss RPS plot
-    plotfuncs.plot_multiple_column_vs_r_and_p(
-        h_df, "final_loss", "n_sparse", label="final loss", filename_prefix="hadamard"
     )
 
     ratios = np.linspace(RATIO_MIN, RATIO_MAX, GRID_WIDTH)

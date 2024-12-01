@@ -164,7 +164,9 @@ def plot_multiple_column_vs_r_and_p(
 
     filename = filename.replace(" ", "_")
 
-    plt.savefig(f"../figures/{filename}", bbox_inches="tight", dpi=300)
+    save_dir = Path('figures')
+    save_dir.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_dir / f"{filename}.png", bbox_inches="tight", dpi=300)
     if paper_directory:
         plt.savefig(Path(paper_directory) / f"{filename}", bbox_inches="tight", dpi=300)
     if show_plot:
@@ -231,7 +233,10 @@ def plot_columns_simple(
     # plt.grid(True, linestyle='--', alpha=0.7)
     plt.tight_layout()
     if filename:
-        plt.savefig(f"../figures/{filename}.png", bbox_inches="tight", dpi=300)
+    # Create the directory if it doesn't exist
+        save_dir = Path('figures')
+        save_dir.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_dir / f"{filename}.png", bbox_inches="tight", dpi=300)
         if paper_directory:
             plt.savefig(
                 Path(paper_directory) / f"{filename}.png", bbox_inches="tight", dpi=300
