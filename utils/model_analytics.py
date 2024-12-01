@@ -6,7 +6,7 @@ import torch as t
 from scipy.stats import kstest
 
 import data as scd
-from PersianRug.model import Model
+from model import Model
 
 # Todo: (If n_sparse gets very large, and we consider only smaller n_dense):
 #       Rewrite the functions to accept a model that keeps W_in, Wout unmultiplied.

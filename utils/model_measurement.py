@@ -4,7 +4,7 @@ import os
 from . import model_analytics as ma
 import dill
 from dataclasses import dataclass
-import PersianRug.hadamard_model as hm
+import hadamard_model as hm
 
 class ModelMeasurement():
     def __init__(self, model) -> None:

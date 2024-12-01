@@ -38,8 +38,8 @@ from tqdm import tqdm
 import data
 import hadamard_model as hm
 import model as m
-from PersianRug.utils import model_measurement as mm
-from PersianRug.utils import opt_linear as ol
+from utils import model_measurement as mm
+from utils import opt_linear as ol
 
 ModelType = Union[m.Model, hm.HadamardModel]
 
