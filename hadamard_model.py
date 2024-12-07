@@ -1,18 +1,18 @@
 # pylint: disable=trailing-whitespace
 """
-This module defines the HadamardConfig and HadamardModel classes for setting up and training 
+This module defines the HadamardConfig and HadamardModel classes for setting up and training
 a Hadamard model using PyTorch.
 
 Classes:
     HadamardConfig: A configuration class for setting up and training a Hadamard model.
-    HadamardModel: A PyTorch neural network module that uses Hadamard matrices for its 
+    HadamardModel: A PyTorch neural network module that uses Hadamard matrices for its
     weight initialization.
 """
 
 import pathlib
 import random
 from dataclasses import dataclass
-from typing import List, Self, Union
+from typing import List, Union
 
 import dill
 import numpy as np
@@ -72,8 +72,8 @@ class HadamardConfig:
 
 class HadamardModel(t.nn.Module):
     """
-    HadamardModel is a PyTorch neural network module that uses Hadamard matrices for its 
-    weight initialization. It is designed to work with sparse and dense representations 
+    HadamardModel is a PyTorch neural network module that uses Hadamard matrices for its
+    weight initialization. It is designed to work with sparse and dense representations
     and includes methods for optimization and loss computation.
     Attributes:
         cfg (HadamardConfig): Configuration object containing model parameters.
@@ -86,7 +86,7 @@ class HadamardModel(t.nn.Module):
         scalar_of_Identity (bool): Flag indicating if Adiag is a scalar.
         Adiag (torch.nn.Parameter): Diagonal matrix or scalar for scaling.
     Methods:
-        __init__(self, cfg: HadamardConfig, device='cpu', **optim_kwargs): Initializes the 
+        __init__(self, cfg: HadamardConfig, device='cpu', **optim_kwargs): Initializes the
             HadamardModel.
         set_mean(self, mean): Sets the mean parameter.
         forward(self, x): Forward pass of the model.
@@ -97,7 +97,7 @@ class HadamardModel(t.nn.Module):
         ratio(self): Returns the ratio of dense to sparse features.
         final_loss(self): Returns the final loss value.
         W_matrix(self): Returns the product of Wout and Win matrices.
-        optimize(self, data_factory: data.DataFactory, plot=False, logging=True, device='cpu'): 
+        optimize(self, data_factory: data.DataFactory, plot=False, logging=True, device='cpu'):
             Optimizes the model using Adam optimizer.
         save(self, path: str): Saves the model to a file.
         load(cls, path: Union[str, pathlib.Path], map_location="cpu"): Loads the model from a file.
@@ -144,7 +144,7 @@ class HadamardModel(t.nn.Module):
         Args:
             x (Float[Tensor, "batch n_sparse"]): Input tensor with shape (batch, n_sparse).
         Returns:
-            Float[Tensor, "batch n_sparse"]: Output tensor after applying the Hadamard 
+            Float[Tensor, "batch n_sparse"]: Output tensor after applying the Hadamard
                 transformation and ReLU activation function.
         """
         preactivs = (x @ self.Win.T) @ self.Wout.T
@@ -194,7 +194,7 @@ class HadamardModel(t.nn.Module):
         """
         Computes the product of the output weight matrix (Wout) and the input weight matrix (Win).
         Returns:
-            Float[Tensor, "n_sparse n_sparse"]: The resulting matrix from the multiplication 
+            Float[Tensor, "n_sparse n_sparse"]: The resulting matrix from the multiplication
                 of Wout and Win.
         """
 
@@ -207,7 +207,7 @@ class HadamardModel(t.nn.Module):
         Optimize the model using the provided data factory.
         Args:
             data_factory (data.DataFactory): An instance of DataFactory to generate data loaders.
-            logging (bool, optional): If True, logs the loss and other information during training. 
+            logging (bool, optional): If True, logs the loss and other information during training.
                 Defaults to True.
             device (str, optional): The device to run the optimization on ('cpu' or 'cuda').
                 Defaults to 'cpu'.
@@ -284,11 +284,11 @@ class HadamardModel(t.nn.Module):
 
     def save(self, path: str):
         """
-        Save the model's configuration, state dictionary, losses, and feature probabilities 
+        Save the model's configuration, state dictionary, losses, and feature probabilities
             to a specified path.
         Args:
-            path (str): The file path where the model data will be saved. The main data will 
-                        be saved with the given path, and additional model information will 
+            path (str): The file path where the model data will be saved. The main data will
+                        be saved with the given path, and additional model information will
                         be saved with a '.modelinfo' suffix.
         The method performs the following steps:
         1. Creates a dictionary containing the model's configuration, state dictionary, losses,
@@ -317,7 +317,7 @@ class HadamardModel(t.nn.Module):
             )
 
     @classmethod
-    def load(cls, path: Union[str, pathlib.Path], map_location="cpu") -> Self:
+    def load(cls, path: Union[str, pathlib.Path], map_location="cpu"):
         """
         Load a model from a specified path.
         Args:
@@ -333,4 +333,3 @@ class HadamardModel(t.nn.Module):
         model.losses = model_data["losses"]
         model.p_feat = model_data["p_feat"]
         return model
- 

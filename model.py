@@ -1,15 +1,15 @@
-""" 
+"""
 This module defines a neural network model with configurable architecture and training procedures.
 Classes:
-    Config: A dataclass that holds the configuration for a trained model, 
+    Config: A dataclass that holds the configuration for a trained model,
             including architecture and training parameters.
-    Model: A neural network model class with methods for initialization, 
+    Model: A neural network model class with methods for initialization,
             forward pass, training, and evaluation.
 """
 # pylint: disable=trailing-whitespace
 import pathlib
 from dataclasses import dataclass
-from typing import List, Literal, Optional, Self, Union
+from typing import List, Literal, Optional, Union
 
 import dill
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ from torch import Tensor, nn
 
 import data
 
-# For plotting live loss in jupyter 
+# For plotting live loss in jupyter
 try:
     from IPython.display import clear_output  # type: ignore
 except ImportError:
@@ -32,7 +32,7 @@ except ImportError:
         pass
 
 ActivationFunctionName = Literal["identity", "relu", "tanh", "leaky_relu", "gelu"]
-act_funcs = {"identity": lambda x: x, "relu": F.relu, "tanh": F.tanh, 
+act_funcs = {"identity": lambda x: x, "relu": F.relu, "tanh": F.tanh,
              "leaky_relu": F.leaky_relu, "gelu":F.gelu}
 
 
@@ -73,7 +73,7 @@ class Config:
     init_layer_bias: bool = False
     hidden_layers_bias: bool = False
     final_layer_bias: bool = False
-    
+
     # activations
     init_layer_act_func: str = "identity"
     hidden_layers_act_func: str = "identity"
@@ -81,7 +81,7 @@ class Config:
 
     # tie encoder/decoder
     tie_dec_enc_weights: bool = False
-    
+
     # training parameters
     data_size: int = 10_000
     batch_size: int = 1024
@@ -136,31 +136,31 @@ class Model(t.nn.Module):
     # ============================================================
     # Model Architecture
     # ============================================================
-    
+
     def __init__(self, cfg: Config):
         super().__init__()
 
         self.cfg = cfg
         self.layers = nn.ModuleList()
-        
+
         self.p_feat = None
         self.losses = None
-                
+
         # encoding layer (n_sparse -> n_dense)
         self.initial_layer = nn.Linear(cfg.n_sparse, cfg. n_dense, bias = cfg.init_layer_bias)
         #self.layers.append(initial_layer)
-        
+
         for _ in range(cfg.n_hidden_layers):
             self.layers.append(nn.Linear(cfg.n_dense, cfg.n_dense, bias = cfg.hidden_layers_bias))
-            
+
         # decoding layer (n_dense -> n_sparse)
         self.final_layer = nn.Linear(cfg.n_dense, cfg.n_sparse, bias = cfg.final_layer_bias)
-        
+
         if cfg.tie_dec_enc_weights:
             self.final_layer.weight.data = self.initial_layer.weight.data.T
         #self.layers.append(final_layer)
-        
-            
+
+
     def forward(self, x: Float[Tensor, "batch n_sparse"]) -> Float[Tensor, "batch n_sparse"]:
         """
         Perform a forward pass through the network.
@@ -174,33 +174,33 @@ class Model(t.nn.Module):
         - Final layer transformation followed by an activation function.
         - Caching of activations at each layer.
         """
-        
-        cache = {}                
-        
-        
+
+        cache = {}
+
+
         x = self.initial_layer(x)
         x = act_funcs[self.cfg.init_layer_act_func](x)
-                
+
         cache["activations"] = [x]
-        
+
         for l in self.layers:
             if self.cfg.residual:
                 x = act_funcs[self.cfg.hidden_layers_act_func](l(x)) + x
             else:
                 x = act_funcs[self.cfg.hidden_layers_act_func](l(x))
-            cache["activations"].append(x)            
-            
+            cache["activations"].append(x)
+
         x = self.final_layer(x)
         cache["activations"].append(x)
         x = act_funcs[self.cfg.final_layer_act_func](x)
-        
-        
+
+
         return x, cache
-        
+
     # ============================================================
     # Model Training
     # ============================================================
-    
+
     def plot_live_loss(self, step_log: List, losses: List, steps: int):
         """
         Plots the live loss and secondary loss during training.
@@ -212,20 +212,20 @@ class Model(t.nn.Module):
         Returns:
             None
         """
-        
+
         clear_output(wait=True)
         _, ax = plt.subplots(ncols=1, figsize=(10, 3))
-                            
+
         ax[0].plot(step_log, losses)
         ax[0].set_title("loss")
         ax[0].set_xlabel("log steps")
         ax[0].set_ylabel("log loss")
         ax[0].set_xlim(0, steps)
-        
+
         ax[0].text(0.5, -0.2, self.metadata, ha="center", va="top", transform=ax[0].transAxes, fontsize=12, color="gray")
-        
+
         plt.show()
-        return 
+        return
 
     def compute_loss(self, data_factory: data.DataFactory, batch_size: int = 1000, device: str = "cpu"):
         """
@@ -244,22 +244,22 @@ class Model(t.nn.Module):
             batch_size = batch_size,
             device = device
         )
-        
+
         loss_function = F.mse_loss
         importance_weights = t.pow(t.arange(self.cfg.n_sparse) + 1, -self.cfg.importance / 2).reshape((1, -1))
         losses = []
-        
+
         for batch, labels in data_obj:
             batch = batch.to(device)
             labels = labels.to(device)
             importance_weights = importance_weights.to(device)
             predictions, _ = self(batch)
-            
-            losses.append(loss_function(predictions * importance_weights, labels * importance_weights))            
-        
+
+            losses.append(loss_function(predictions * importance_weights, labels * importance_weights))
+
         return np.mean(losses[0].item())
 
-    
+
     def optimize(self, data_factory: data.DataFactory, plot: bool=False, logging: bool=True, device: str ='cpu') -> List[float]:
         """
         Optimize the model using the provided data factory.
@@ -271,53 +271,53 @@ class Model(t.nn.Module):
         Returns:
             List[float]: A list of loss values recorded during the optimization process.
         """
-            
+
         optimizer = t.optim.Adam([param for param in self.parameters() if param.requires_grad],
                                   lr = self.cfg.lr, eps=1e-7)
         loss_function = F.mse_loss
-        
+
         losses = []
         on_losses = []
         step_log = []
-        
+
         step = 0
         epoch = 0
         tot_steps = self.cfg.max_epochs*self.cfg.data_size//self.cfg.batch_size + 1
         update_times = min(tot_steps, self.cfg.update_times)
 
         loss_change = float("inf")
-        
+
         importance_weights = t.pow(t.arange(self.cfg.n_sparse) + 1, -self.cfg.importance / 2).reshape((1, -1))
-        
+
         while (loss_change > self.cfg.convergence_tolerance or epoch < self.cfg.min_epochs) and epoch < self.cfg.max_epochs:
 
             if len(losses) > 2 * self.cfg.loss_window:
                 loss_change = np.log10(np.mean(losses[-2 * self.cfg.loss_window:-self.cfg.loss_window])) - np.log10(np.mean(losses[-self.cfg.loss_window:]))
-            
+
             # create data
             data_obj = data_factory.generate_data_loader(
-                data_size=self.cfg.data_size, 
+                data_size=self.cfg.data_size,
                 batch_size=self.cfg.batch_size,
                 device=device
             )
 
             iterator = iter(data_obj)
             for batch, labels in iterator:
-             
+
                 batch = batch.to(device)
                 labels = labels.to(device)
                 importance_weights = importance_weights.to(device)
                 predictions, _ = self(batch)
-                
+
                 loss = loss_function(predictions * importance_weights, labels * importance_weights)
 
                 on_loss = t.tensor(1.0)
-                
+
                 # update
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                
+
                 step += 1
                 # print if needed
                 time_to_log = step % (tot_steps//update_times) == 0 or step == 1
@@ -325,24 +325,24 @@ class Model(t.nn.Module):
                     step_log.append(step)
                     losses.append(loss.item())
                     on_losses.append(on_loss.item())
-                
+
                 if time_to_log and logging:
                     print(f'{loss_change=}')
                     print(f'{loss.item() = }')
                     print(f'{epoch=} {len(losses) = }')
                     if plot:
                         self.plot_live_loss(step_log, losses, steps = len(step_log))
-                                        
+
             epoch += 1
-                    
+
         self.losses = losses
         self.p_feat = data_factory.cfg.p_feature
-        return 
-    
+        return
+
     # ============================================================
     # Helper functions
     # ============================================================
-    
+
     def ratio(self)->float:
         """
         Calculate the ratio of dense to sparse configurations.
@@ -351,7 +351,7 @@ class Model(t.nn.Module):
         """
 
         return self.cfg.n_dense/self.cfg.n_sparse
-    
+
     def final_loss(self)->Optional[float]:
         """
         Returns the final loss value from the list of losses.
@@ -366,19 +366,19 @@ class Model(t.nn.Module):
         """
         Computes the product of the weight matrices of the final and initial layers.
         Returns:
-            torch.Tensor: The resulting weight matrix after multiplying the weight 
+            torch.Tensor: The resulting weight matrix after multiplying the weight
             matrices of the final and initial layers.
         """
         return self.final_layer.weight.data @ self.initial_layer.weight.data
-    
-    
+
+
     def save(self, path: str):
         """
         Save the model's state and configuration to the specified path.
         Args:
             path (str): The file path where the model and its information will be saved.
         The method saves the model's state dictionary, configuration, losses, and feature parameters
-        using the `torch.save` function with `dill` as the pickle module. Additionally, it creates a 
+        using the `torch.save` function with `dill` as the pickle module. Additionally, it creates a
         separate file with a `.modelinfo` suffix containing the same information for easier access.
         The saved data includes:
             - cfg: The model's configuration.
@@ -386,7 +386,7 @@ class Model(t.nn.Module):
             - losses: The losses associated with the model.
             - p_feat: The feature parameters of the model.
         """
-        save_data = dict(cfg=self.cfg, state_dict = self.state_dict(), 
+        save_data = dict(cfg=self.cfg, state_dict = self.state_dict(),
                          losses=self.losses, p_feat=self.p_feat)
         t.save(save_data, path, pickle_module=dill)
         path = pathlib.Path(path)
@@ -396,9 +396,9 @@ class Model(t.nn.Module):
                              losses=self.losses,
                              p_feat=self.p_feat,
                              modelpth=path), f)
-    
+
     @classmethod
-    def load(cls, path: Union[str, pathlib.Path], map_location="cpu") -> Self:
+    def load(cls, path: Union[str, pathlib.Path], map_location="cpu"):
         """
         Load a model from a specified path.
         Args:
@@ -413,4 +413,4 @@ class Model(t.nn.Module):
         model.losses = model_data["losses"]
         model.p_feat = model_data["p_feat"]
         return model
-    
+
