@@ -1,15 +1,11 @@
 """
-This is a script for plotting curves of loss versus ratio and loss versus p, 
-for various models. 
+This is a script for plotting curves of loss versus ratio and loss versus p,
+for various models.
 """
-
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
-
 from typing import Iterable
 import numpy as np
 import pandas as pd
+
 # Custom Packages
 from utils import model_analytics as ma
 from utils import model_scan as ms
@@ -104,7 +100,7 @@ def plot_loss_with_ratio(
 
     Args:
         comb_df (pd.Dataframe): Combined dataframe (may include hadamard, trained, linear)
-        target_ps (Iterable[float]): target p_feats        
+        target_ps (Iterable[float]): target p_feats
     """
     for target_p_feat in target_ps:
         combined_target_p_feat = ma.get_closest_models_df(

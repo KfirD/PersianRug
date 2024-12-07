@@ -20,8 +20,6 @@ Functions:
     load_hadamard_model_measurements: Loads Hadamard model measurements for a given experiment.
     load_multiple_trained_experiments_measurements: Generates a dataframe for multiple experiments.
     load_multiple_hadamard_experiments_measurements: Loads and combines measurements from multiple Hadamard experiments.
-Constants:
-    _IGNORE_SUFFIXES: A tuple of file suffixes to ignore when loading models from a directory.
 """
 
 import itertools
@@ -70,7 +68,7 @@ def train_model(
     Returns:
         m.Model: The trained model.
     """
- 
+
 
     # training variables for both models
     dataconfig = data.Config(p, n_sparse, (0, 1))
@@ -159,8 +157,8 @@ def train_multiple_models(
         total=total,
     )
     pbar.set_description(
-        """ratio: N/A, p_feat: N/A, non_linearity: N/A, 
-        final_layer_biases: N/A, tie_dec_enc_weights: N/A,  
+        """ratio: N/A, p_feat: N/A, non_linearity: N/A,
+        final_layer_biases: N/A, tie_dec_enc_weights: N/A,
         loss: N/A
         """
     )
@@ -187,7 +185,8 @@ def train_multiple_models(
         pbar.set_description(
             f"ratio: {model.ratio():.2f}, p: {p_feat:.4f}, non_linearity: {activation}, bias: {final_layer_bias}, tie_weights: {tie_dec_enc_weights}, loss: {model.final_loss():.4f}"
         )
-        model.save(path / str(model_idx))
+        model_path = path / f"{model_idx}".with_suffix(".model")
+        model.save(model_path)
 
 
 def train_hadamard_model(
@@ -314,16 +313,14 @@ def train_multiple_hadamard_models(
         pbar.set_description(
             f"n_sparse: {model.cfg.n_sparse}, Ratio: {model.ratio():.2f}, p_feat: {p_feat}, Loss: {model.final_loss():.4f}"
         )
-        model.save(path / str(model_idx))
+        model_path = path / f"{model_idx}".with_suffix(".model")
+        model.save(model_path)
         with open(path / f"{model_idx}_losses.dill", "wb") as file:
             dill.dump(losses, file)
     return
 
 
 # load models
-_IGNORE_SUFFIXES = (".modelinfo", ".dill", ".dill_spec", ".DS_Store")
-
-
 def _load_trained_models_as_list(
     experiment_name: str, model_type: ModelType, device: str = "cpu"
 ) -> List[Union[m.Model, hm.HadamardModel]]:
@@ -346,7 +343,7 @@ def _load_trained_models_as_list(
 
     models = []
     for file in path.iterdir():
-        if file.is_file() and not file.name.endswith(_IGNORE_SUFFIXES):
+        if file.is_file() and file.name.endswith(".model"):
             new_model = model_type.load(file, map_location=t.device(device))
             models.append(new_model)
 
@@ -437,7 +434,7 @@ def _load_trained_model_measurements_as_list(
     assert path.is_dir()
     model_measurements = []
     for file in path.iterdir():
-        if file.is_file() and not file.name.endswith(_IGNORE_SUFFIXES):
+        if file.is_file() and file.name.endswith(".model"):
             new_model = m.Model.load(file, map_location=t.device(device))
             model_measurements.append(mm.ModelMeasurement(new_model))
     return model_measurements
@@ -465,7 +462,7 @@ def _load_hadamard_model_measurements_as_list(
     assert path.is_dir()
     model_measurements = []
     for file in path.iterdir():
-        if file.is_file() and not file.name.endswith(_IGNORE_SUFFIXES):
+        if file.is_file() and file.name.endswith(".model"):
             new_model = hm.HadamardModel.load(file, map_location=t.device(device))
             model_measurements.append(mm.HadamardModelMeasurement(new_model))
     return model_measurements
@@ -709,7 +706,7 @@ def create_multiple_optimal_linear_models_df(
     lin_df['experiment_nickname'] = 'opt_linear'
     lin_df['experiment_name'] = 'optimal_linear'
     lin_df['final_loss'] = lin_df.apply(lambda x: linear_model_from_row(x).final_loss() , axis=1)
-    
+
     return lin_df
 
 # def load_hadamard_losses(experiment_name, device="cpu"):

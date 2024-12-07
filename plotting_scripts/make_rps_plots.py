@@ -1,12 +1,7 @@
 """
-This script is for making heatmaps (over p_feat and ratio) for various quantities 
+This script is for making heatmaps (over p_feat and ratio) for various quantities
 of interest for the trained model.
 """
-
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
-
 from typing import Dict, Tuple, Optional
 
 
@@ -37,8 +32,8 @@ def make_rps_plots(dframe: pd.DataFrame,
         show_plot : bool, default=False
             If True, the plots will be displayed. If False, the plots will not be displayed.
     """
-    
-    
+
+
     cols_to_plot = {
         'chi_varvar': r'$\Delta\mathrm{var}(\nu)$',
         'chi_pval': r'$p_{\mathrm{KS}}$',
@@ -69,7 +64,7 @@ def make_rps_plots(dframe: pd.DataFrame,
     return
 
 if __name__ == "__main__":
-    df, mm_dict = ms.load_multiple_trained_experiments_measurements(EXPERIMENTS, overwrite=False)    
+    df, mm_dict = ms.load_multiple_trained_experiments_measurements(EXPERIMENTS, overwrite=False)
     df = df[df['n_sparse'].isin(N_SPARSES_TO_KEEP)]
 
     make_rps_plots(df, mm_dict, paper_directory=None, orientation=None)
